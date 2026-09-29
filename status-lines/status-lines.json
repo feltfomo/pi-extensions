@@ -1,0 +1,19 @@
+{
+  "separator": " | ",
+  "lines": [
+    {
+      "left": [{ "widget": "project-root", "priority": 100, "settings": { "style": "short" } }],
+      "center": [],
+      "right": [{ "widget": "git", "priority": 90, "settings": { "showCheckout": true } }]
+    },
+    {
+      "left": [
+        { "widget": "provider", "priority": 60 },
+        { "widget": "model", "priority": 90 },
+        { "widget": "thinking", "priority": 70 }
+      ],
+      "center": [{ "widget": "extension-statuses", "priority": 20 }],
+      "right": [{ "widget": "codex-weekly", "priority": 100, "settings": { "pollSeconds": 300 } }]
+    }
+  ]
+}

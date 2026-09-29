@@ -1,0 +1,6 @@
+.research/
+.checks/
+result
+result-*
+.direnv/
+*.log
