@@ -26,11 +26,12 @@ For another flake, declare the input URL as `git+ssh://git@github.com/feltfomo/p
 
 ## Home Manager
 
-Import `inputs.pi-extensions.homeManagerModules.status-lines` into a Home Manager configuration. Set `programs.pi-coding-agent.extensions.status-lines.enable = true`. The compiled example in `nix/examples/home-manager.nix` enables the extension and changes its separator.
+Import `inputs.pi-extensions.homeManagerModules.status-lines` into a Home Manager configuration. Set `programs.pi-coding-agent.extensions.status-lines.enable = true`. The compiled example in `nix/examples/home-manager.nix` enables the extension, shows Codex reset timestamps, and changes its separator.
 
 Options:
 
 - `enable`: defaults to false.
+- `showReset`: defaults to false. Enable it to show a local reset timestamp beside every `codex-weekly` widget, including widgets in custom layouts. It overrides individual `showReset` settings when true; false leaves individual settings unchanged.
 - `package`: defaults to the Status Lines derivation built with Home Manager's `pkgs`; it can be set to `inputs.pi-extensions.packages.<system>.status-lines`.
 - `settings`: JSON-compatible Status Lines configuration. Defaults are read from `status-lines/status-lines.json`. Partial top-level overrides retain other defaults. A `lines` definition replaces the complete tier list.
 

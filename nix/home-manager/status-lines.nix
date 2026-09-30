@@ -9,7 +9,29 @@ let
   agentDir = config.programs.pi-coding-agent.configDir;
   json = pkgs.formats.json { };
   defaults = builtins.fromJSON (builtins.readFile ../../status-lines/status-lines.json);
-  configFile = json.generate "pi-status-lines.json" cfg.settings;
+  configFile = json.generate "pi-status-lines.json" (
+    cfg.settings
+    // {
+      lines = builtins.map (
+        line:
+        lib.mapAttrs (
+          _: widgets:
+          builtins.map (
+            widget:
+            if cfg.showReset && widget.widget == "codex-weekly" then
+              widget
+              // {
+                settings = (widget.settings or { }) // {
+                  showReset = true;
+                };
+              }
+            else
+              widget
+          ) widgets
+        ) line
+      ) cfg.settings.lines;
+    }
+  );
 in
 {
   options.programs.pi-coding-agent.extensions.status-lines = {
@@ -19,6 +41,15 @@ in
       default = pkgs.callPackage ../packages/status-lines.nix { };
       defaultText = lib.literalExpression "inputs.pi-extensions.packages.${pkgs.stdenv.hostPlatform.system}.status-lines";
       description = "Pi package containing Status Lines and its runtime dependencies.";
+    };
+    showReset = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Show the local reset timestamp beside every Codex weekly quota widget.
+        When enabled, this overrides showReset in individual widget settings.
+        When disabled, individual widget settings remain unchanged.
+      '';
     };
     settings = lib.mkOption {
       type = lib.types.submodule {
