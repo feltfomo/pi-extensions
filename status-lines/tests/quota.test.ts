@@ -62,6 +62,40 @@ test("widget displays actual remaining quota, enforces request spacing, and mark
   assert.ok(!widget.render(theme).includes(token));
 });
 
+test("reset display is opt-in and uses the weekly window's local reset date", async (t) => {
+  const originalFetch = globalThis.fetch;
+  const originalNow = Date.now;
+  const reset = new Date(2033, 4, 18, 14, 5);
+  let now = reset.getTime() - 60_000;
+  Date.now = () => now;
+  t.after(() => { globalThis.fetch = originalFetch; Date.now = originalNow; });
+  globalThis.fetch = async () => Response.json({ rate_limit: {
+    primary_window: { ...week(90, 18000), reset_at: reset.getTime() / 1000 + 3600 },
+    secondary_window: { ...week(27), reset_at: reset.getTime() / 1000 },
+  } });
+  const enabled = createWidget(environment(), { showReset: true });
+  const disabled = createWidget(environment(), { showReset: false });
+  t.after(() => { enabled.dispose?.(); disabled.dispose?.(); });
+  await enabled.refresh?.();
+  await disabled.refresh?.();
+  assert.equal(enabled.render(theme), "weekly 73% left (resets 2033-05-18 14:05)");
+  assert.equal(disabled.render(theme), "weekly 73% left");
+  now = reset.getTime();
+  assert.equal(enabled.render(theme), "weekly 73% left (resets 2033-05-18 14:05) (stale)");
+});
+
+test("reset display preserves unavailable states and validates settings", async (t) => {
+  for (const showReset of ["true", 1, null]) {
+    assert.throws(() => createWidget(environment(), { showReset }), /showReset/);
+  }
+  assert.throws(() => createWidget(environment(), { unknown: true }), /Unknown/);
+  const widget = createWidget(environment("openai-codex", ""), { showReset: true });
+  t.after(() => widget.dispose?.());
+  assert.equal(widget.render(theme), "weekly loading");
+  await widget.refresh?.();
+  assert.equal(widget.render(theme), "weekly login required");
+});
+
 test("missing authentication and other providers display explicit unavailable states", async (t) => {
   const missingWidget = createWidget(environment("openai-codex", ""), {});
   const other = createWidget(environment("anthropic"), {});

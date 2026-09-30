@@ -39,9 +39,15 @@ type State =
 
 const createWidget: WidgetFactory = (environment, settings) => {
   const pollSeconds = settings.pollSeconds ?? 300;
-  if (typeof pollSeconds !== "number" || !Number.isFinite(pollSeconds) || pollSeconds < 60 || pollSeconds > 3600 ||
-    Object.keys(settings).some((key) => key !== "pollSeconds")) {
+  if (typeof pollSeconds !== "number" || !Number.isFinite(pollSeconds) || pollSeconds < 60 || pollSeconds > 3600) {
     throw new Error("codex-weekly settings: pollSeconds must be between 60 and 3600");
+  }
+  const showReset = settings.showReset ?? false;
+  if (settings.showReset !== undefined && typeof settings.showReset !== "boolean") {
+    throw new Error("codex-weekly settings: showReset must be a boolean");
+  }
+  if (Object.keys(settings).some((key) => key !== "pollSeconds" && key !== "showReset")) {
+    throw new Error("Unknown codex-weekly setting");
   }
   let state: State = { kind: "loading" };
   let pending = false;
@@ -112,7 +118,13 @@ const createWidget: WidgetFactory = (environment, settings) => {
       if (state.kind !== "quota") return theme.fg("dim", `weekly ${state.kind}`);
       const stale = state.stale || Date.now() >= state.quota.resetAt * 1000;
       const remaining = Math.floor(state.quota.remaining * 10) / 10;
-      return theme.fg(stale || remaining <= 20 ? "warning" : "muted", `weekly ${remaining}% left${stale ? " (stale)" : ""}`);
+      let resetLabel = "";
+      if (showReset) {
+        const reset = new Date(state.quota.resetAt * 1000);
+        const pad = (value: number) => String(value).padStart(2, "0");
+        resetLabel = ` (resets ${reset.getFullYear()}-${pad(reset.getMonth() + 1)}-${pad(reset.getDate())} ${pad(reset.getHours())}:${pad(reset.getMinutes())})`;
+      }
+      return theme.fg(stale || remaining <= 20 ? "warning" : "muted", `weekly ${remaining}% left${resetLabel}${stale ? " (stale)" : ""}`);
     },
     dispose() { clearInterval(timer); stop.abort(); },
   };

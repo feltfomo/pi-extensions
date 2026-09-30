@@ -30,7 +30,7 @@ Built-in settings:
 | --- | --- |
 | `project-root` | `style`: `short`, `full`, or `name`; default `short` abbreviates the home directory |
 | `git` | `showCheckout`: boolean, default true |
-| `codex-weekly` | `pollSeconds`: 60 to 3600, default 300 |
+| `codex-weekly` | `pollSeconds`: 60 to 3600, default 300; `showReset`: boolean, default false |
 | `model`, `provider`, `thinking`, `extension-statuses` | None |
 
 Git labels `local` and `worktree` distinguish the main working tree from a linked worktree. Detached HEAD displays its short commit ID. Outside Git, the root is the working directory and Git displays `no git`. These labels do not describe remote execution.
@@ -54,6 +54,8 @@ The footer host owns shared Git inspection because both project-root and Git wid
 The widget requests `https://chatgpt.com/backend-api/wham/usage` using Pi's resolved Codex credentials and the account ID from the access token. Pi owns token refresh. The fixed endpoint rejects redirects; credentials never enter config, logs, or footer text. No model completion is made to obtain quota.
 
 The weekly window is selected by its duration of 604800 seconds, not by assuming primary or secondary means weekly. Remaining percentage is `100 - used_percent`, displayed to one decimal place without rounding upward. Additional model-specific limits are not displayed. This account endpoint is an upstream implementation detail and can change.
+
+Set `"showReset": true` in the `codex-weekly` entry's `settings` to append `(resets YYYY-MM-DD HH:mm)` beside the percentage. The timestamp uses the machine's local timezone and comes from the same weekly quota window. It remains visible on stale values; unavailable states have no reset timestamp.
 
 The widget shows `loading`, `login required`, `unavailable`, or `n/a` instead of estimating a percentage. Pi's `--offline` mode disables quota requests and displays `weekly offline`. A failed refresh retains the last successful value with `(stale)`. An expired quota window is also marked stale. Requests are spaced at least 60 seconds apart; normal polling is every five minutes. Non-Codex models display `weekly n/a`.
 
