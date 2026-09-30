@@ -1,0 +1,29 @@
+{
+  "separator": " | ",
+  "lines": [
+    {
+      "left": [
+        { "widget": "project-root", "priority": 100, "settings": { "style": "short" } },
+        { "widget": "session", "enabled": false, "priority": 30 }
+      ],
+      "center": [],
+      "right": [
+        { "widget": "git", "priority": 90, "settings": { "showCheckout": true } },
+        { "widget": "diff", "priority": 40 }
+      ]
+    },
+    {
+      "left": [
+        { "widget": "provider", "priority": 60 },
+        { "widget": "model", "priority": 90 },
+        { "widget": "thinking", "priority": 70 }
+      ],
+      "center": [{ "widget": "extension-statuses", "enabled": false, "priority": 20 }],
+      "right": [
+        { "widget": "context", "priority": 80 },
+        { "widget": "codex-weekly", "priority": 100, "settings": { "pollSeconds": 300 } },
+        { "widget": "response-time", "priority": 50 }
+      ]
+    }
+  ]
+}

@@ -30,26 +30,42 @@
           pkgs = pkgsFor system;
         in
         {
-          status-lines = pkgs.callPackage ./nix/packages/status-lines.nix { };
-          default = self.packages.${system}.status-lines;
+          footer-plus = pkgs.callPackage ./nix/packages/footer-plus.nix { };
+          session-manager = pkgs.callPackage ./nix/packages/session-manager.nix {
+            inherit (self.packages.${system}) footer-plus;
+          };
+          status-lines = self.packages.${system}.footer-plus;
+          default = self.packages.${system}.footer-plus;
         }
       );
 
       homeManagerModules = {
-        status-lines = ./nix/home-manager/status-lines.nix;
-        default = self.homeManagerModules.status-lines;
+        footer-plus = ./nix/home-manager/footer-plus.nix;
+        session-manager = ./nix/home-manager/session-manager.nix;
+        status-lines = self.homeManagerModules.footer-plus;
+        default = {
+          imports = [
+            self.homeManagerModules.footer-plus
+            self.homeManagerModules.session-manager
+          ];
+        };
       };
 
       checks = forSystems (
         system:
         let
           pkgs = pkgsFor system;
-          status-lines = self.packages.${system}.status-lines;
+          inherit (self.packages.${system}) footer-plus session-manager;
         in
         {
-          inherit status-lines;
-          home-manager-status-lines = import ./nix/checks/home-manager.nix {
-            inherit pkgs home-manager status-lines;
+          inherit footer-plus session-manager;
+          home-manager = import ./nix/checks/home-manager.nix {
+            inherit
+              pkgs
+              home-manager
+              footer-plus
+              session-manager
+              ;
           };
         }
       );
